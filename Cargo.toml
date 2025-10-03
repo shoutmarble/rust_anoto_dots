@@ -1,0 +1,13 @@
+[package]
+name = "rust_anoto_dots"
+version = "0.1.0"
+edition = "2021"
+authors = ["shoutmarble"]
+description = "Rust version of cheind/py-microdots - encoding and decoding 2D locations based on the Anoto dot pattern approach"
+license = "MIT"
+repository = "https://github.com/shoutmarble/rust_anoto_dots"
+
+[dependencies]
+ndarray = "0.15"
+
+[dev-dependencies]
