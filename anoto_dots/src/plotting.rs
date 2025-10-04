@@ -7,6 +7,9 @@ pub fn draw_dots(
     _grid_size: f64,
     filename: &str,
 ) -> Result<(), Box<dyn Error>> {
+    // Persist the bitmatrix
+    crate::persist::save_bitmatrix_text(bitmatrix, "bitmatrix.txt")?;
+    crate::persist::save_bitmatrix_json(bitmatrix, "bitmatrix.json")?;
 
     let root_area = BitMapBackend::new(filename, (800, 400))
     .into_drawing_area();

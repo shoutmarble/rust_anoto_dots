@@ -2,6 +2,8 @@ use ndarray::{Array2, Array3, Axis, s};
 use std::error::Error;
 use std::fmt;
 
+pub mod persist;
+
 // Custom error type for decoding errors
 #[derive(Debug)]
 pub struct DecodingError {
