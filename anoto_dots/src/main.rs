@@ -1,5 +1,4 @@
 use ndarray::{Array2, Array3, Axis, s};
-use plotters::prelude::*;
 use std::error::Error;
 use std::fmt;
 
@@ -395,89 +394,14 @@ fn find_subsequence(haystack: &[i8], needle: &[i8]) -> Option<usize> {
         .position(|window| window == needle)
 }
 
-// Drawing function using plotters
-pub fn draw_dots(
-    bitmatrix: &Array3<i8>,
-    grid_size: f64,
-    show_grid: bool,
-    filename: &str,
-) -> Result<(), Box<dyn Error>> {
-    let root = BitMapBackend::new(filename, (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let mut chart = ChartBuilder::on(&root)
-        .caption("Anoto Dot Pattern", ("sans-serif", 30))
-        .margin(20)
-        .x_label_area_size(40)
-        .y_label_area_size(40)
-        .build_cartesian_2d(
-            0f64..(bitmatrix.dim().1 as f64 * grid_size),
-            0f64..(bitmatrix.dim().0 as f64 * grid_size)
-        )?;
-
-    chart.configure_mesh()
-        .disable_x_mesh()
-        .disable_y_mesh()
-        .draw()?;
-
-    // Offset lookup table for dot positions
-    // (0,0)=UP, (0,1)=RIGHT, (1,0)=LEFT, (1,1)=DOWN
-    let offsets = [
-        (0.0, -1.0),   // (0,0): UP (north)
-        (1.0, 0.0),    // (0,1): RIGHT (east)  
-        (-1.0, 0.0),   // (1,0): LEFT (west)
-        (0.0, 1.0),    // (1,1): DOWN (south)
-    ];
-    let offset_scale = grid_size / 6.0;
-
-    // Draw dots
-    for y in 0..bitmatrix.dim().0 {
-        for x in 0..bitmatrix.dim().1 {
-            let x_bit = bitmatrix[[y, x, 0]] as usize;
-            let y_bit = bitmatrix[[y, x, 1]] as usize;
-            let dot_type = x_bit + (y_bit << 1); // Pack bits: y is high bit, x is low bit
-            
-            let base_x = x as f64 * grid_size + grid_size / 2.0;
-            let base_y = y as f64 * grid_size + grid_size / 2.0;
-            
-            let offset_x = offsets[dot_type].0 * offset_scale;
-            let offset_y = offsets[dot_type].1 * offset_scale;
-            
-            let dot_x = base_x + offset_x;
-            let dot_y = base_y + offset_y;
-            
-            chart.draw_series(std::iter::once(Circle::new((dot_x, dot_y), 2, BLACK.filled())))?;
-        }
-    }
-
-    // Draw grid if requested
-    if show_grid {
-        for i in 0..=bitmatrix.dim().1 {
-            let x = i as f64 * grid_size;
-            chart.draw_series(std::iter::once(PathElement::new(
-                vec![(x, 0.0), (x, bitmatrix.dim().0 as f64 * grid_size)],
-                BLUE.stroke_width(1)
-            )))?;
-        }
-        for i in 0..=bitmatrix.dim().0 {
-            let y = i as f64 * grid_size;
-            chart.draw_series(std::iter::once(PathElement::new(
-                vec![(0.0, y), (bitmatrix.dim().1 as f64 * grid_size, y)],
-                BLUE.stroke_width(1)
-            )))?;
-        }
-    }
-
-    root.present()?;
-    Ok(())
-}
-
 fn main() -> Result<(), Box<dyn Error>> {
     // Use the default embodiment with A4 sequence fixed
     let codec = anoto_6x6_a4_fixed();
 
     // Generate a bit-matrix for section (10,2) - matching Python example
-    let bitmatrix = codec.encode_bitmatrix((9, 16), (10, 2));
+    // let bitmatrix = codec.encode_bitmatrix((9, 16), (10, 2));
+    let bitmatrix = codec.encode_bitmatrix((9, 16), (120, 20));
+
 
     println!("Generated bitmatrix with shape: ({}, {}, {})", 
              bitmatrix.dim().0, bitmatrix.dim().1, bitmatrix.dim().2);
@@ -492,8 +416,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("\nMatrix matches expected Python output: {}", matches);
              
     // Render dots to dots2.png to match the filename you mentioned
-    draw_dots(&bitmatrix, 1.0, true, "dots2.png")?;
-    println!("Dot pattern saved as dots2.png");
+    anoto_dots::plotting::draw_dots(&bitmatrix, 1.0, "anoto_dots.png")?;
+    println!("Dot pattern saved as anoto_dots.png");
 
     // Decode the same partial matrix as Python example: G[3:3+6, 7:7+6]
     let sub_matrix = bitmatrix.slice(s![3..9, 7..13, ..]).to_owned();
