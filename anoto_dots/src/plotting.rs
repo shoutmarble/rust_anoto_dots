@@ -22,17 +22,17 @@ pub fn draw_dots(
 
     ctx.configure_mesh()
         .x_labels(18)
-        .x_label_formatter(&|v| format!("{}", (v / 10) + 1))
-        .y_labels(11)
-        .y_label_formatter(&|v| format!("{}", (v / 10) + 1))
+        .x_label_formatter(&|v| format!("{}", (v / 10) ))
+        .y_labels(12)
+        .y_label_formatter(&|v| format!("{}", (v / 10) ))
         .draw().unwrap();
 
    // Draw circles based on bitmatrix values
     ctx.draw_series(
         (0..bitmatrix.dim().0).flat_map(|y| {
             (0..bitmatrix.dim().1).map(move |x| {
-                let mut x_bit = bitmatrix[[y, x, 0]] as usize;
-                let mut y_bit = bitmatrix[[y, x, 1]] as usize;
+                let x_bit = bitmatrix[[y, x, 0]] as usize;
+                let y_bit = bitmatrix[[y, x, 1]] as usize;
                 let dot_type = x_bit + (y_bit << 1);
                 let color = match dot_type {
                     0 => &BLACK, // UP
